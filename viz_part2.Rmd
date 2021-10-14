@@ -94,7 +94,23 @@ weather_df %>%
   )
 ```
 
+## Themes
 
+```{r}
+weather_df %>% 
+  ggplot(aes(x = tmin, y = tmax, color = name)) +
+  geom_point(alpha = .3) +
+  labs(
+    title = "Temperature at three stations",
+    x = "Minimum daily temp (C)",
+    x = "Maximum daily temp (C)",
+    caption = "Data from rnoaa package with three station"
+  ) +
+  scale_color_viridis_d() +
+  theme_minimal() +
+  theme(legend.position = "bottom")  
+  
+```
 
 
 
