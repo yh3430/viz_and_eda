@@ -38,6 +38,161 @@ weather_df =
 ```
 
 
+## 'group_by'
+
+```{r}
+weather_df %>%
+  group_by(name, month)
+  
+```
+
+## count some things
+
+```{r}
+weather_df %>% 
+  group_by(name, month) %>% 
+  summarize(n_obs = n())
+
+weather_df %>% 
+  count(name)
+```
+
+It's nice that this is a date frame. But don't do 'table', and that is bad
+
+```{r}
+weather_df %>% 
+  pull(name) %>% 
+  table()
+```
+
+May be better with 'tabyl' than 'table'
+```{r}
+weather_df %>% 
+  janitor::tabyl(month, name)
+```
+
+## More general summaries
+
+```{r}
+weather_df %>% 
+  group_by(name, month) %>% 
+  summarize(
+    n_obs = n(),
+    mean_tmax = mean(tmax, na.rm = TRUE),
+    median_tmax = median(tmax, na.rm = TRUE),
+    sd_tmax = sd(tmax, na.rm = TRUE)
+    
+  ) %>% 
+  ggplot(aes(x = month, y = mean_tmax, color = name)) +
+  geom_point() +
+  geom_line()
+```
+
+
+Formatting table outpouts
+
+```{r}
+weather_df %>% 
+  group_by(name) %>% 
+  summarize(
+    n_obs = n(),
+    mean_tmax = mean(tmax, na.rm = TRUE)
+  ) %>% 
+  knitr::kable(digits = 2)
+```
+
+## grouped 'mutate'
+
+```{r}
+weather_df %>% 
+  group_by(name) %>% 
+  mutate(
+    mean_tmax = mean(tmax, na.rm = TRUE),
+    centered_tmax = tmax - mean_tmax
+  ) %>% 
+  ggplot(aes(x = date, y = centered_tmax, color = name)) +
+  geom_point()
+```
+
+```{r}
+weather_df %>% 
+  group_by(name) %>% 
+  mutate(
+    tmax_rank = min_rank(desc(tmax))
+  ) %>% 
+  filter(tmax_rank < 2)
+```
+
+Lagged variables - tmax of the previous day 'lay()'. NA issue at lecture video 46:39
+
+```{r}
+weather_df %>% 
+  group_by(name) %>% 
+  mutate(
+    lagged_tmax = lag(tmax, n = 1),
+    tmax_diff = tmax - lag(tmax, n = 1)
+  ) %>% 
+  summarize(diff_sd = sd(tmax_diff, na.rm = TRUE))
+```
+
+## Limitations
+ 
+What if my "summary" is a linear model
+
+'group_by' don't work for linear function 'lm()'
+```{r, eval = FALSE}
+weather_df %>% 
+  group_by(name) %>% 
+  summarize(cor_tmin_tmax = cor(tmin, tmax, use = "complete"))
+
+weather_df %>% 
+  filter(name == "CentralPark_NY") %>% 
+  lm(tmax ~ tmin, data = .)
+  
+weather_df %>% 
+  group_by(name) %>% 
+  summarize(lm = lm(tmax ~ tmin))
+```
+
+
+
+
+
+ 
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
